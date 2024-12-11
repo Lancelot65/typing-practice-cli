@@ -18,7 +18,7 @@ class load_data:
     
     def _load(self) -> None:
         with open(self.PATH_DICT[self.language], 'r', encoding='utf-8') as file:
-            self.data = load(file)[:5000]
+            self.data = load(file)
 
     def get_data(self):
         return self.data

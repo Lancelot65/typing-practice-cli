@@ -66,7 +66,7 @@ class kyboard:
         
         self.past_letter = []
             
-        self.setting = {'nbr_word' : 30, 'nbr_letter' : 15}
+        self.setting = {'nbr_word' : 200, 'nbr_letter' : 20}
         self.data = load_data().data
         self.data_tools = data_tools(self.data)
         self.sentence = self.data_tools.get_word(self.setting['nbr_letter'], self.setting['nbr_word'])
@@ -85,38 +85,8 @@ class kyboard:
         curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)  # error typed text
         curses.init_pair(2, curses.COLOR_CYAN, curses.COLOR_BLACK)  # Current character
         curses.init_pair(3, curses.COLOR_BLACK, curses.COLOR_BLACK)  # good typed text
-    
-    # def print(self):
-    #     self.stdscr.clear()
-    #     # Display
-    #     for i in range(len(self.sentence[:self.position])):
-    #         self.stdscr.addstr(0, i, self.sentence[i], curses.color_pair(3) if self.past_letter[i] else curses.color_pair(1))
-    #     self.stdscr.addstr(0, self.position, self.sentence[self.position], curses.color_pair(2))
-    #     self.stdscr.addstr(0, self.position + 1, self.sentence[self.position + 1:])
-    #     self.stdscr.refresh()
-    
-    # def print(self):
-    #     height, width = self.stdscr.getmaxyx()
-    #     rang = 0 
-    #     col = 0
-        
 
-    #     for i, letters in enumerate(self.sentence):
-    #         if col + 1 >= width:
-    #             rang += 1
-    #             col = 0  # Réinitialiser la colonne
-    #         if i < len(self.past_letter):
-    #             self.stdscr.addstr(rang, col, self.sentence[i], curses.color_pair(3) if self.past_letter[i] else curses.color_pair(1))
-    #         else:
-    #             self.stdscr.addstr(rang, col, letters, curses.color_pair(3))
-    #         if i == self.position:
-    #             self.stdscr.addstr(rang, col, letters, curses.color_pair(2))
-
-    #         col += 1
-                
-    #     self.stdscr.refresh()
-
-    def print(self):
+    def print(self): # marche plus
         height, width = self.stdscr.getmaxyx()
         rang, col, i = 0, 0, 0
         
@@ -152,6 +122,41 @@ class kyboard:
             col += 1
             i += 1
                 
+        self.stdscr.refresh()
+        
+    def print_float(self, _front_visibility, _back_visibility, start_col = 5): # print center        
+        front_visibility = _front_visibility
+        back_visibility = _back_visibility
+        
+        if _front_visibility == 'auto':
+            height, width = self.stdscr.getmaxyx()
+            front_visibility = int(width / 2)
+            back_visibility = int(width / 2)
+            start_col = 0
+        
+        
+        min_index = max(self.position - back_visibility, 0)
+        max_index = min(self.position + front_visibility - min(self.position - back_visibility, 0), len(self.sentence))
+        col = start_col
+        
+        back = self.sentence[min_index:self.position]
+        current = self.sentence[self.position]
+        front = self.sentence[self.position + 1:max_index]
+        sentence_show = back + current + front
+                
+        self.stdscr.clear()
+        
+        for i, letter in enumerate(sentence_show):
+            color = curses.color_pair(3)
+            if i + min_index  < len(self.past_letter):
+                color = curses.color_pair(3) if self.past_letter[min_index + i] else curses.color_pair(1)
+            
+            if i + min_index == self.position:
+                color = curses.color_pair(2)
+            self.stdscr.addstr(2, col, letter, color)
+        
+            col += 1
+
         self.stdscr.refresh()
 
     
@@ -193,8 +198,8 @@ class kyboard:
         self.first_letter = True
         self.run = True
         while self.run:
-            self.print()                
-                    
+            # self.print_flaot('auto', 0)                
+            self.print()
             self.kyboard()
 
             if self.position >= len(self.sentence):
@@ -204,12 +209,6 @@ class kyboard:
     def __del__(self):
         self.stdscr.erase()
         
-try:
-    ky = kyboard()
-    print(ky.time_info.get_wpm_word())
-except Exception as e:
-    print(e)
+ky = kyboard()
+print(ky.time_info.get_wpm_word())
     
-# TODO
-# [ ] : faire un truc qui défile sur le coté tout seul quand on écrit
-# [ ] : emepche les mots de se couper 
